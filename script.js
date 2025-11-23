@@ -4,18 +4,26 @@ const allFoodWords = [
     'HUEVOS', 'MANZANA', 'NARANJA', 'FRESAS', 'CHOCOLATE', 'GALLETAS', 'PANQUEQUE', 'TARTA', 'MANTECA', 'SALSA'
 ];
 
-const GRID_SIZE = 16; // Cuadrícula de 16x16
-const NUM_WORDS = 15; // 15 palabras por partida
+// --- Configuraciones del Juego ---
+const GRID_SIZE = 16; 
+const NUM_WORDS = 15; 
+
+// --- Elementos del DOM ---
 const wordSearchGrid = document.getElementById('wordSearchGrid');
 const wordListElement = document.getElementById('wordList');
 const newGameButton = document.getElementById('newGameButton');
 
+// --- Variables de Estado ---
 let selectedWords = [];
 let grid = [];
-let isMouseDown = false;
+let isMouseDown = false; // Usado para ratón y toque
 let startCell = null;
-let currentSelection = []; // Celdas seleccionadas temporalmente
-let foundWords = new Set(); // Para llevar un registro de las palabras encontradas
+let currentSelection = []; 
+let foundWords = new Set(); 
+
+// ----------------------------------------------------------------------
+// ## 1. Inicialización y Generación de la Cuadrícula
+// ----------------------------------------------------------------------
 
 function initializeGame() {
     selectedWords = getRandomWords(allFoodWords, NUM_WORDS);
@@ -34,7 +42,8 @@ function initializeGame() {
 
 function getRandomWords(wordPool, count) {
     const shuffled = [...wordPool].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count).sort(); // Ordenar alfabéticamente para la lista
+    // Selecciona 15 y las ordena alfabéticamente para la lista
+    return shuffled.slice(0, count).sort(); 
 }
 
 function createEmptyGrid(size) {
@@ -45,15 +54,16 @@ function placeWordsInGrid(words, grid) {
     words.forEach(word => {
         let placed = false;
         let attempts = 0;
-        const maxAttempts = 100; // Evitar bucles infinitos
+        const maxAttempts = 100;
 
         while (!placed && attempts < maxAttempts) {
             const row = Math.floor(Math.random() * GRID_SIZE);
-            const col = Math.floor(Math.random() * (GRID_SIZE - word.length + 1)); // Solo horizontal
+            // El rango de columna inicial debe dejar espacio para la palabra (solo horizontal)
+            const col = Math.floor(Math.random() * (GRID_SIZE - word.length + 1)); 
 
-            // Verificar si la palabra cabe y no choca con letras existentes no vacías
             let canPlace = true;
             for (let i = 0; i < word.length; i++) {
+                // Verificar si choca con una letra diferente a la que queremos colocar
                 if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) {
                     canPlace = false;
                     break;
@@ -67,10 +77,6 @@ function placeWordsInGrid(words, grid) {
                 placed = true;
             }
             attempts++;
-        }
-        // Si no se pudo colocar, es un problema de diseño o palabras muy largas para la cuadrícula
-        if (!placed) {
-            console.warn(`No se pudo colocar la palabra: ${word}`);
         }
     });
 }
@@ -86,15 +92,33 @@ function fillEmptyCells(grid) {
     }
 }
 
-function renderGrid(grid) {
-  div.addEventListener('touchstart', handleTouchStart, { passive: true });
-        div.addEventListener('touchmove', handleTouchMove, { passive: false });
-        div.addEventListener('touchend', handleMouseUp); // Reutilizamos handleMouseUp
-            wordSearchGrid.appendChild(div);
+// ----------------------------------------------------------------------
+// ## 2. Renderizado de Interfaz
+// ----------------------------------------------------------------------
 
+function renderGrid(grid) {
+    wordSearchGrid.innerHTML = '';
+    wordSearchGrid.style.setProperty('--grid-cols', GRID_SIZE); 
+    
+    grid.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+            const div = document.createElement('div');
+            div.classList.add('grid-cell');
+            div.dataset.row = rowIndex;
+            div.dataset.col = colIndex;
+            div.textContent = cell;
+
+            // --- Eventos del Ratón ---
             div.addEventListener('mousedown', handleMouseDown);
             div.addEventListener('mouseup', handleMouseUp);
             div.addEventListener('mouseenter', handleMouseEnter);
+
+            // --- Eventos Táctiles (para móviles/tabletas) ---
+            div.addEventListener('touchstart', handleTouchStart, { passive: true });
+            div.addEventListener('touchmove', handleTouchMove, { passive: false });
+            div.addEventListener('touchend', handleMouseUp); // touchend usa la misma lógica que mouseup
+
+            wordSearchGrid.appendChild(div);
         });
     });
 }
@@ -105,17 +129,57 @@ function renderWordList(words) {
         const li = document.createElement('li');
         const checkbox = document.createElement('div');
         checkbox.classList.add('checkbox');
-        checkbox.innerHTML = '&nbsp;'; // Espacio para que no esté vacío
+        checkbox.innerHTML = '&nbsp;'; 
 
         const wordText = document.createElement('span');
         wordText.textContent = word;
 
         li.appendChild(checkbox);
         li.appendChild(wordText);
-        li.dataset.word = word; // Guardar la palabra en el dataset
+        li.dataset.word = word; 
         wordListElement.appendChild(li);
     });
 }
+
+// ----------------------------------------------------------------------
+// ## 3. Lógica de Interacción (Ratón y Táctil)
+// ----------------------------------------------------------------------
+
+function getCellFromCoordinates(x, y) {
+    return document.elementFromPoint(x, y);
+}
+
+function clearSelection() {
+    currentSelection.forEach(cell => cell.classList.remove('selected'));
+    currentSelection = [];
+    startCell = null;
+}
+
+function highlightSelection(targetCell) {
+    const startRow = parseInt(startCell.dataset.row);
+    const startCol = parseInt(startCell.dataset.col);
+    const targetRow = parseInt(targetCell.dataset.row);
+    const targetCol = parseInt(targetCell.dataset.col);
+
+    // Solo Horizontal (misma fila y de izquierda a derecha)
+    if (startRow === targetRow && targetCol >= startCol) {
+        clearSelection(); 
+        for (let i = startCol; i <= targetCol; i++) {
+            const cell = wordSearchGrid.querySelector(`[data-row="${startRow}"][data-col="${i}"]`);
+            if (cell) {
+                cell.classList.add('selected');
+                currentSelection.push(cell);
+            }
+        }
+    } else {
+        // Si la dirección no es válida, solo se marca la celda inicial
+        clearSelection();
+        startCell.classList.add('selected');
+        currentSelection = [startCell];
+    }
+}
+
+// --- Manejadores de Ratón ---
 
 function handleMouseDown(e) {
     isMouseDown = true;
@@ -123,6 +187,11 @@ function handleMouseDown(e) {
     clearSelection();
     e.target.classList.add('selected');
     currentSelection.push(e.target);
+}
+
+function handleMouseEnter(e) {
+    if (!isMouseDown || !startCell) return;
+    highlightSelection(e.target);
 }
 
 function handleMouseUp() {
@@ -134,64 +203,66 @@ function handleMouseUp() {
     clearSelection();
 }
 
-function handleMouseEnter(e) {
-  e.preventDefault();
-const touch = e.touches[0];
-    const targetCell = document.elementFromPoint(touch.clientX, touch.clientY);
-   if (targetCell && targetCell.classList.contains('grid-cell')) {
-        isMouseDown = true; // Usamos la misma bandera lógica
+// --- Manejadores Táctiles (Solución para móviles) ---
+
+function handleTouchStart(e) {
+    //e.preventDefault(); // Descomentar si el scroll es un problema, pero puede interferir con la UX.
+    
+    const touch = e.touches[0];
+    const targetCell = getCellFromCoordinates(touch.clientX, touch.clientY);
+    
+    if (targetCell && targetCell.classList.contains('grid-cell')) {
+        isMouseDown = true; 
         startCell = targetCell;
         clearSelection();
         targetCell.classList.add('selected');
         currentSelection.push(targetCell);
+    }
+}
 
-    // Solo permitir selección horizontal de izquierda a derecha
-    if (startRow === targetRow && targetCol >= startCol) {
-        clearSelection(); // Limpiar antes de calcular la nueva selección
-        for (let i = startCol; i <= targetCol; i++) {
-            const cell = wordSearchGrid.querySelector(`[data-row="${startRow}"][data-col="${i}"]`);
-            if (cell) {
-                cell.classList.add('selected');
-                currentSelection.push(cell);
-            }
-        }
-    } else {
-        // Si no es una selección válida, simplemente marcamos la celda de inicio
-        clearSelection();
-        startCell.classList.add('selected');
-        currentSelection = [startCell];
+function handleTouchMove(e) {
+    if (!isMouseDown || !startCell) return;
+    e.preventDefault(); // Previene el scroll del navegador mientras se arrastra la selección.
+
+    const touch = e.touches[0];
+    const targetCell = getCellFromCoordinates(touch.clientX, touch.clientY);
+    
+    if (targetCell && targetCell.classList.contains('grid-cell')) {
+        highlightSelection(targetCell);
     }
 }
 
 
-function clearSelection() {
-    currentSelection.forEach(cell => cell.classList.remove('selected'));
-    currentSelection = [];
-    startCell = null;
-}
+// ----------------------------------------------------------------------
+// ## 4. Verificación y Marcado Automático
+// ----------------------------------------------------------------------
 
 function checkWord(word) {
     if (selectedWords.includes(word) && !foundWords.has(word)) {
-        // Marcar las celdas de la cuadrícula como encontradas (permanente)
+        
+        // 1. Marcado permanente en la cuadrícula (Color B: Verde)
         currentSelection.forEach(cell => {
-            cell.classList.remove('selected'); // Eliminar selección temporal
-            cell.classList.add('found'); // Añadir clase de encontrado
+            cell.classList.remove('selected'); 
+            cell.classList.add('found'); 
         });
 
-        // Marcar la palabra en la lista inferior (automático con checkbox)
+        // 2. Marcado automático en la lista (Checkbox con ✓)
         const listItem = wordListElement.querySelector(`li[data-word="${word}"]`);
         if (listItem) {
             listItem.classList.add('found-word');
             const checkbox = listItem.querySelector('.checkbox');
             checkbox.classList.add('checked');
-            checkbox.innerHTML = '&#10003;'; // Símbolo de verificación
+            checkbox.innerHTML = '&#10003;'; // Símbolo de verificación (✓)
         }
-        foundWords.add(word); // Añadir a la lista de palabras encontradas
+        foundWords.add(word); 
     }
 }
 
+// ----------------------------------------------------------------------
+// ## 5. Punto de Inicio
+// ----------------------------------------------------------------------
+
 newGameButton.addEventListener('click', initializeGame);
 
-// Iniciar el juego la primera vez
-
+// Iniciar el juego la primera vez que se carga la página
 initializeGame();
