@@ -8,7 +8,7 @@ body {
     background-color: #f0f0f0; 
     color: #333;
     
-    /* 🔒 IMPIDE LA SELECCIÓN Y COPIA DE TEXTO EN TODA LA PÁGINA */
+    /* 🔒 IMPIDE LA SELECCIÓN Y COPIA DE TEXTO */
     user-select: none;
     -webkit-user-select: none; 
     -moz-user-select: none;
@@ -36,17 +36,19 @@ h2 {
 }
 
 /* ---------------------------------------------------------------------- */
-/* ## Cuadrícula Compacta y Táctil */
+/* ## Estilo de la Cuadrícula */
 /* ---------------------------------------------------------------------- */
 
 .grid-container {
     display: grid;
     grid-template-columns: repeat(var(--grid-cols), 1fr); 
-    gap: 0; /* CERO espacio entre celdas */
+    gap: 0; 
     border: 2px solid #ccc;
     background-color: #eee;
     margin: 0 auto;
     max-width: fit-content;
+    /* Necesario para que pointerdown funcione correctamente */
+    touch-action: pan-x pan-y; 
 }
 
 .grid-cell {
@@ -63,21 +65,20 @@ h2 {
     transition: background-color 0.1s ease, color 0.1s ease;
     border: 1px solid #e0e0e0; 
     
-    /* SOLUCIÓN TÁCTIL: Permite el arrastre sin interferencia del scroll */
-   manipulation; pan-x pan-y; 
+    /* ELIMINAMOS RESTRICCIONES DUDOSAS DE TOUCH-ACTION AQUÍ */
 }
 
 /* ---------------------------------------------------------------------- */
 /* ## Marcado de Interacción */
 /* ---------------------------------------------------------------------- */
 
-/* Marcado temporal al seleccionar (Color A: Amarillo) */
+/* Marcado temporal al seleccionar (Amarillo) */
 .grid-cell.selected {
     background-color: #ffe082; 
     color: #444;
 }
 
-/* Marcado permanente de palabra encontrada (Color B: Verde) */
+/* Marcado permanente de palabra encontrada (Verde) */
 .grid-cell.found {
     background-color: #81c784; 
     color: #fff;
@@ -85,7 +86,7 @@ h2 {
 }
 
 /* ---------------------------------------------------------------------- */
-/* ## Estilo de la Lista y Botón */
+/* ## Lista y Botón */
 /* ---------------------------------------------------------------------- */
 
 #wordList {
@@ -154,5 +155,3 @@ h2 {
     background-color: #eee;
     margin: 30px 0;
 }
-
-
