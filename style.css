@@ -10,7 +10,7 @@ body {
     
     /* 🔒 IMPIDE LA SELECCIÓN Y COPIA DE TEXTO EN TODA LA PÁGINA */
     user-select: none;
-    -webkit-user-select: none; /* Compatibilidad con navegadores antiguos */
+    -webkit-user-select: none; 
     -moz-user-select: none;
 }
 
@@ -36,13 +36,13 @@ h2 {
 }
 
 /* ---------------------------------------------------------------------- */
-/* ## Estilo de la Cuadrícula Compacta y Táctil */
+/* ## Cuadrícula Compacta y Táctil */
 /* ---------------------------------------------------------------------- */
 
 .grid-container {
     display: grid;
     grid-template-columns: repeat(var(--grid-cols), 1fr); 
-    gap: 0; /* CERO espacio entre celdas para un look compacto */
+    gap: 0; /* CERO espacio entre celdas */
     border: 2px solid #ccc;
     background-color: #eee;
     margin: 0 auto;
@@ -63,7 +63,7 @@ h2 {
     transition: background-color 0.1s ease, color 0.1s ease;
     border: 1px solid #e0e0e0; 
     
-    /* SOLUCIÓN TÁCTIL: Permite el arrastre sin interferencia del scroll del navegador */
+    /* SOLUCIÓN TÁCTIL: Permite el arrastre sin interferencia del scroll */
     touch-action: none; 
 }
 
@@ -85,7 +85,7 @@ h2 {
 }
 
 /* ---------------------------------------------------------------------- */
-/* ## Estilo de la Lista de Palabras */
+/* ## Estilo de la Lista y Botón */
 /* ---------------------------------------------------------------------- */
 
 #wordList {
@@ -114,7 +114,6 @@ h2 {
     background-color: #f1f8e9;
 }
 
-/* Estilo del Checkbox [ ] */
 .checkbox {
     width: 20px;
     height: 20px;
@@ -127,16 +126,11 @@ h2 {
     flex-shrink: 0;
 }
 
-/* Estilo del Checkbox [✓] */
 .checkbox.checked {
     background-color: #4CAF50;
     color: #fff;
     font-size: 1.2em;
 }
-
-/* ---------------------------------------------------------------------- */
-/* ## Estilo del Botón y Separador */
-/* ---------------------------------------------------------------------- */
 
 #newGameButton {
     background-color: #2196F3;
