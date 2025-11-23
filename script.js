@@ -87,7 +87,7 @@ function fillEmptyCells(grid) {
 }
 
 // ----------------------------------------------------------------------
-// ## 2. Renderizado y Adjuntar Eventos
+// ## 2. Renderizado de la Cuadrícula
 // ----------------------------------------------------------------------
 
 function renderGrid(grid) {
@@ -101,14 +101,8 @@ function renderGrid(grid) {
             div.dataset.row = rowIndex;
             div.dataset.col = colIndex;
             div.textContent = cell;
-
-            // Eventos del Ratón: Solo mousedown y mouseenter en las celdas
-            div.addEventListener('mousedown', handleMouseDown);
-            div.addEventListener('mouseenter', handleMouseEnter);
-
-            // Eventos Táctiles
-            div.addEventListener('touchstart', handleTouchStart, { passive: true });
-            div.addEventListener('touchmove', handleTouchMove, { passive: false });
+            
+            // Los eventos de interacción se gestionan en el contenedor (handlePointerDown)
             
             wordSearchGrid.appendChild(div);
         });
@@ -134,12 +128,12 @@ function renderWordList(words) {
 }
 
 // ----------------------------------------------------------------------
-// ## 3. Lógica de Selección y Arrastre (El FIX)
+// ## 3. Lógica de Selección y Arrastre (FIX UNIFICADO)
 // ----------------------------------------------------------------------
 
 function getCellFromCoordinates(x, y) {
-    // Usa un método más robusto para encontrar el elemento bajo el punto
     const element = document.elementFromPoint(x, y);
+    // Devuelve la celda solo si el elemento existe y tiene la clase 'grid-cell'
     return element && element.classList.contains('grid-cell') ? element : null;
 }
 
@@ -159,11 +153,10 @@ function highlightSelection(targetCell) {
 
     // RESTRIICIÓN: Solo Horizontal de Izquierda a Derecha
     if (startRow === targetRow && targetCol >= startCol) {
-        // Limpiamos la selección anterior antes de crear la nueva
+        
         currentSelection.forEach(cell => cell.classList.remove('selected'));
         currentSelection = [];
         
-        // Iteramos desde la columna inicial hasta la columna final
         for (let i = startCol; i <= targetCol; i++) {
             const cell = wordSearchGrid.querySelector(`[data-row="${startRow}"][data-col="${i}"]`);
             if (cell) {
@@ -180,84 +173,59 @@ function highlightSelection(targetCell) {
 }
 
 // ----------------------------------------------------------------------
-// ## 4. Manejadores de Eventos (Fix Global)
+// ## 4. Manejadores de Eventos (pointerdown/move/up)
 // ----------------------------------------------------------------------
 
-// --- Manejadores de Ratón ---
+// Inicia la selección (Clic del ratón o Toque con el dedo)
+function handlePointerDown(e) {
+    // Solo inicia si el clic/toque está en una celda
+    if (!e.target.classList.contains('grid-cell')) return; 
 
-function handleMouseDown(e) {
-    // Aseguramos que solo reaccione al botón primario (izquierdo)
-    if (e.button !== 0) return; 
-    
+    // Previene el inicio de la selección de texto nativa del navegador
+    e.preventDefault(); 
+
     isMouseDown = true;
     startCell = e.target;
-    // Limpiamos la selección previa ANTES de iniciar la nueva
     clearSelection();
     
     startCell.classList.add('selected');
     currentSelection.push(startCell);
+
+    // Adjuntar eventos de movimiento y fin a nivel del DOCUMENTO
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
 }
 
-function handleMouseEnter(e) {
-    // Solo actualiza el marcado si el clic está presionado
-    if (!isMouseDown) return; 
-    
-    highlightSelection(e.target);
-}
-
-// FUNCIÓN FIX: Escucha el movimiento en todo el documento para arrastres rápidos
-function handleGlobalMouseMove(e) {
+// Gestiona el arrastre
+function handlePointerMove(e) {
     if (!isMouseDown) return;
 
-    // Obtenemos la celda debajo del cursor (puede ser null si está fuera de la cuadrícula)
+    // Aquí ya no necesitamos e.preventDefault() si el CSS funciona, pero es buena práctica
+    
     const targetCell = getCellFromCoordinates(e.clientX, e.clientY);
     
     if (targetCell) {
         highlightSelection(targetCell);
     } 
-    // Si targetCell es null, la selección anterior se mantiene visible.
 }
 
-// FUNCIÓN FIX: Se dispara al soltar el clic/dedo en CUALQUIER PARTE del documento
-function handleMouseUp() {
+// Finaliza la selección
+function handlePointerUp(e) {
     if (!isMouseDown) return;
 
     isMouseDown = false;
     
+    // Remover los eventos globales para evitar consumo de recursos
+    document.removeEventListener('pointermove', handlePointerMove);
+    document.removeEventListener('pointerup', handlePointerUp);
+
+    // Realiza la verificación de la palabra al soltar
     if (currentSelection.length > 0) {
         const selectedWordText = currentSelection.map(cell => cell.textContent).join('');
         checkWord(selectedWordText);
     }
     
-    // Al finalizar la verificación, la selección temporal se limpia.
     clearSelection(); 
-}
-
-// --- Manejadores Táctiles ---
-
-function handleTouchStart(e) {
-    const touch = e.touches[0];
-    const targetCell = getCellFromCoordinates(touch.clientX, touch.clientY);
-    
-    if (targetCell) {
-        isMouseDown = true; 
-        startCell = targetCell;
-        clearSelection();
-        targetCell.classList.add('selected');
-        currentSelection.push(targetCell);
-    }
-}
-
-function handleTouchMove(e) {
-    if (!isMouseDown) return;
-    e.preventDefault(); // Bloquea el scroll del móvil
-
-    const touch = e.touches[0];
-    const targetCell = getCellFromCoordinates(touch.clientX, touch.clientY);
-    
-    if (targetCell) {
-        highlightSelection(targetCell);
-    }
 }
 
 
@@ -268,13 +236,13 @@ function handleTouchMove(e) {
 function checkWord(word) {
     if (selectedWords.includes(word) && !foundWords.has(word)) {
         
-        // Marcado permanente en la cuadrícula (Color B: Verde)
+        // Marcado permanente en la cuadrícula
         currentSelection.forEach(cell => {
             cell.classList.remove('selected'); 
             cell.classList.add('found'); 
         });
 
-        // Marcado automático en la lista (Checkbox con ✓)
+        // Marcado en la lista
         const listItem = wordListElement.querySelector(`li[data-word="${word}"]`);
         if (listItem) {
             listItem.classList.add('found-word');
@@ -287,15 +255,13 @@ function checkWord(word) {
 }
 
 // ----------------------------------------------------------------------
-// ## 6. Inicio del Programa (Listeners Globales)
+// ## 6. Inicio del Programa
 // ----------------------------------------------------------------------
 
 newGameButton.addEventListener('click', initializeGame);
 
-// * FIX FINAL: Atachamos los eventos de movimiento y fin a nivel del DOCUMENTO
-document.addEventListener('mousemove', handleGlobalMouseMove); 
-document.addEventListener('mouseup', handleMouseUp); 
-document.addEventListener('touchend', handleMouseUp); // touchend usa la misma lógica que mouseup
+// * FIX FINAL: Escucha el inicio del clic/toque en el contenedor de la cuadrícula
+wordSearchGrid.addEventListener('pointerdown', handlePointerDown); 
 
 // Inicializar el juego al cargar la página
 initializeGame();
