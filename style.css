@@ -64,7 +64,7 @@ h2 {
     border: 1px solid #e0e0e0; 
     
     /* SOLUCIÓN TÁCTIL: Permite el arrastre sin interferencia del scroll */
-   touch-action: pan-x pan-y; 
+   manipulation; pan-x pan-y; 
 }
 
 /* ---------------------------------------------------------------------- */
@@ -154,4 +154,5 @@ h2 {
     background-color: #eee;
     margin: 30px 0;
 }
+
 
