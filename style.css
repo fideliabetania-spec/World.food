@@ -5,7 +5,7 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: #f0f0f0; /* Fondo general gris claro */
     color: #333;
 }
 
@@ -20,7 +20,7 @@ body {
 }
 
 h1 {
-    color: #4CAF50;
+    color: #4CAF50; /* Verde vibrante */
     margin-bottom: 20px;
 }
 
@@ -30,20 +30,24 @@ h2 {
     margin-bottom: 15px;
 }
 
+/* ---------------------------------------------------------------------- */
+/* ## Estilo de la Cuadrícula Compacta */
+/* ---------------------------------------------------------------------- */
+
 .grid-container {
     display: grid;
-    /* Ajusta el tamaño de la cuadrícula dinámicamente */
+    /* Usa la variable --grid-cols definida en JS para el layout */
     grid-template-columns: repeat(var(--grid-cols), 1fr); 
-    gap: 1px; /* Espacio mínimo entre celdas */
+    gap: 0; /* ¡CERO espacio entre celdas para un look compacto! */
     border: 2px solid #ccc;
     background-color: #eee;
     margin: 0 auto;
-    max-width: fit-content; /* Para que la cuadrícula no sea demasiado ancha */
+    max-width: fit-content;
 }
 
 .grid-cell {
-    width: 30px; /* Tamaño fijo de la celda */
-    height: 30px; /* Tamaño fijo de la celda */
+    width: 30px; 
+    height: 30px; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -52,27 +56,41 @@ h2 {
     color: #333;
     background-color: #fdfdfd;
     cursor: pointer;
-    transition: background-color 0.1s ease;
-    border: 1px solid #e0e0e0; /* Bordes suaves entre celdas */
+    transition: background-color 0.1s ease, color 0.1s ease;
+    border: 1px solid #e0e0e0; 
+    
+    /* SOLUCIÓN TÁCTIL: Impide el scroll y la selección de texto en móviles */
+    touch-action: none; 
+    user-select: none;
 }
 
-/* Marcado temporal al seleccionar (Color A) */
+/* ---------------------------------------------------------------------- */
+/* ## Marcado de Interacción */
+/* ---------------------------------------------------------------------- */
+
+/* Marcado temporal al seleccionar (Color A: Amarillo) */
 .grid-cell.selected {
-    background-color: #ffe082; /* Amarillo claro */
+    background-color: #ffe082; 
     color: #444;
 }
 
-/* Marcado permanente de palabra encontrada (Color B) */
+/* Marcado permanente de palabra encontrada (Color B: Verde) */
 .grid-cell.found {
-    background-color: #81c784; /* Verde claro */
+    background-color: #81c784; 
     color: #fff;
+    font-weight: 900;
 }
+
+/* ---------------------------------------------------------------------- */
+/* ## Estilo de la Lista de Palabras */
+/* ---------------------------------------------------------------------- */
 
 #wordList {
     list-style: none;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 2 columnas o más si cabe */
+    /* Diseño responsivo para la lista de palabras */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
     gap: 10px;
     margin-top: 20px;
 }
@@ -80,20 +98,21 @@ h2 {
 #wordList li {
     display: flex;
     align-items: center;
-    background-color: #e8f5e9; /* Fondo suave para las palabras */
+    background-color: #e8f5e9; 
     padding: 8px 12px;
     border-radius: 5px;
     font-size: 1.1em;
-    color: #388e3c; /* Verde más oscuro */
+    color: #388e3c; 
     font-weight: bold;
 }
 
 #wordList li.found-word {
-    text-decoration: line-through;
-    color: #a5d6a7; /* Color más tenue cuando está encontrada */
+    text-decoration: line-through; /* Tachado */
+    color: #a5d6a7; 
     background-color: #f1f8e9;
 }
 
+/* Estilo del Checkbox [ ] */
 .checkbox {
     width: 20px;
     height: 20px;
@@ -103,14 +122,19 @@ h2 {
     justify-content: center;
     align-items: center;
     margin-right: 10px;
-    flex-shrink: 0; /* Evita que el checkbox se encoja */
+    flex-shrink: 0;
 }
 
+/* Estilo del Checkbox [✓] */
 .checkbox.checked {
     background-color: #4CAF50;
     color: #fff;
     font-size: 1.2em;
 }
+
+/* ---------------------------------------------------------------------- */
+/* ## Estilo del Botón y Separador */
+/* ---------------------------------------------------------------------- */
 
 #newGameButton {
     background-color: #2196F3;
