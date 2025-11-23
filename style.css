@@ -5,8 +5,13 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    background-color: #f0f0f0; /* Fondo general gris claro */
+    background-color: #f0f0f0; 
     color: #333;
+    
+    /* 🔒 IMPIDE LA SELECCIÓN Y COPIA DE TEXTO EN TODA LA PÁGINA */
+    user-select: none;
+    -webkit-user-select: none; /* Compatibilidad con navegadores antiguos */
+    -moz-user-select: none;
 }
 
 .container {
@@ -20,7 +25,7 @@ body {
 }
 
 h1 {
-    color: #4CAF50; /* Verde vibrante */
+    color: #4CAF50; 
     margin-bottom: 20px;
 }
 
@@ -31,14 +36,13 @@ h2 {
 }
 
 /* ---------------------------------------------------------------------- */
-/* ## Estilo de la Cuadrícula Compacta */
+/* ## Estilo de la Cuadrícula Compacta y Táctil */
 /* ---------------------------------------------------------------------- */
 
 .grid-container {
     display: grid;
-    /* Usa la variable --grid-cols definida en JS para el layout */
     grid-template-columns: repeat(var(--grid-cols), 1fr); 
-    gap: 0; /* ¡CERO espacio entre celdas para un look compacto! */
+    gap: 0; /* CERO espacio entre celdas para un look compacto */
     border: 2px solid #ccc;
     background-color: #eee;
     margin: 0 auto;
@@ -59,9 +63,8 @@ h2 {
     transition: background-color 0.1s ease, color 0.1s ease;
     border: 1px solid #e0e0e0; 
     
-    /* SOLUCIÓN TÁCTIL: Impide el scroll y la selección de texto en móviles */
+    /* SOLUCIÓN TÁCTIL: Permite el arrastre sin interferencia del scroll del navegador */
     touch-action: none; 
-    user-select: none;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -89,7 +92,6 @@ h2 {
     list-style: none;
     padding: 0;
     display: grid;
-    /* Diseño responsivo para la lista de palabras */
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
     gap: 10px;
     margin-top: 20px;
@@ -107,7 +109,7 @@ h2 {
 }
 
 #wordList li.found-word {
-    text-decoration: line-through; /* Tachado */
+    text-decoration: line-through; 
     color: #a5d6a7; 
     background-color: #f1f8e9;
 }
