@@ -102,16 +102,14 @@ function renderGrid(grid) {
             div.dataset.col = colIndex;
             div.textContent = cell;
 
-            // Eventos del Ratón
+            // Eventos del Ratón: Solo mousedown y mouseenter en las celdas
             div.addEventListener('mousedown', handleMouseDown);
-            div.addEventListener('mouseup', handleMouseUp);
             div.addEventListener('mouseenter', handleMouseEnter);
 
-            // Eventos Táctiles (para móviles/tabletas)
+            // Eventos Táctiles
             div.addEventListener('touchstart', handleTouchStart, { passive: true });
             div.addEventListener('touchmove', handleTouchMove, { passive: false });
-            div.addEventListener('touchend', handleMouseUp); 
-
+            
             wordSearchGrid.appendChild(div);
         });
     });
@@ -136,26 +134,168 @@ function renderWordList(words) {
 }
 
 // ----------------------------------------------------------------------
-// ## 3. Lógica de Selección (El núcleo de la corrección)
+// ## 3. Lógica de Selección y Arrastre (El FIX)
 // ----------------------------------------------------------------------
 
-// Función auxiliar para obtener la celda bajo el punto de toque
 function getCellFromCoordinates(x, y) {
-    return document.elementFromPoint(x, y);
+    // Usa un método más robusto para encontrar el elemento bajo el punto
+    const element = document.elementFromPoint(x, y);
+    return element && element.classList.contains('grid-cell') ? element : null;
 }
 
 function clearSelection() {
-    // 1. Limpia el marcado visual temporal de todas las celdas previamente seleccionadas
     currentSelection.forEach(cell => cell.classList.remove('selected'));
-    // 2. Limpia el array de selección
     currentSelection = [];
-    // 3. Resetea la celda inicial
     startCell = null;
 }
 
-// Función principal que marca la selección temporal y aplica la restricción horizontal
 function highlightSelection(targetCell) {
-    // Si no hay celda inicial o la celda de destino no es válida, no hacemos nada
-    if (!startCell || !targetCell || !targetCell.classList.contains('grid-cell')) return;
+    if (!startCell || !targetCell) return;
 
-    const startRow =
+    const startRow = parseInt(startCell.dataset.row);
+    const startCol = parseInt(startCell.dataset.col);
+    const targetRow = parseInt(targetCell.dataset.row);
+    const targetCol = parseInt(targetCell.dataset.col);
+
+    // RESTRIICIÓN: Solo Horizontal de Izquierda a Derecha
+    if (startRow === targetRow && targetCol >= startCol) {
+        // Limpiamos la selección anterior antes de crear la nueva
+        currentSelection.forEach(cell => cell.classList.remove('selected'));
+        currentSelection = [];
+        
+        // Iteramos desde la columna inicial hasta la columna final
+        for (let i = startCol; i <= targetCol; i++) {
+            const cell = wordSearchGrid.querySelector(`[data-row="${startRow}"][data-col="${i}"]`);
+            if (cell) {
+                cell.classList.add('selected');
+                currentSelection.push(cell);
+            }
+        }
+    } else {
+        // Si no es una selección válida, solo se marca la celda de inicio
+        currentSelection.forEach(cell => cell.classList.remove('selected'));
+        currentSelection = [startCell];
+        startCell.classList.add('selected');
+    }
+}
+
+// ----------------------------------------------------------------------
+// ## 4. Manejadores de Eventos (Fix Global)
+// ----------------------------------------------------------------------
+
+// --- Manejadores de Ratón ---
+
+function handleMouseDown(e) {
+    // Aseguramos que solo reaccione al botón primario (izquierdo)
+    if (e.button !== 0) return; 
+    
+    isMouseDown = true;
+    startCell = e.target;
+    // Limpiamos la selección previa ANTES de iniciar la nueva
+    clearSelection();
+    
+    startCell.classList.add('selected');
+    currentSelection.push(startCell);
+}
+
+function handleMouseEnter(e) {
+    // Solo actualiza el marcado si el clic está presionado
+    if (!isMouseDown) return; 
+    
+    highlightSelection(e.target);
+}
+
+// FUNCIÓN FIX: Escucha el movimiento en todo el documento para arrastres rápidos
+function handleGlobalMouseMove(e) {
+    if (!isMouseDown) return;
+
+    // Obtenemos la celda debajo del cursor (puede ser null si está fuera de la cuadrícula)
+    const targetCell = getCellFromCoordinates(e.clientX, e.clientY);
+    
+    if (targetCell) {
+        highlightSelection(targetCell);
+    } 
+    // Si targetCell es null, la selección anterior se mantiene visible.
+}
+
+// FUNCIÓN FIX: Se dispara al soltar el clic/dedo en CUALQUIER PARTE del documento
+function handleMouseUp() {
+    if (!isMouseDown) return;
+
+    isMouseDown = false;
+    
+    if (currentSelection.length > 0) {
+        const selectedWordText = currentSelection.map(cell => cell.textContent).join('');
+        checkWord(selectedWordText);
+    }
+    
+    // Al finalizar la verificación, la selección temporal se limpia.
+    clearSelection(); 
+}
+
+// --- Manejadores Táctiles ---
+
+function handleTouchStart(e) {
+    const touch = e.touches[0];
+    const targetCell = getCellFromCoordinates(touch.clientX, touch.clientY);
+    
+    if (targetCell) {
+        isMouseDown = true; 
+        startCell = targetCell;
+        clearSelection();
+        targetCell.classList.add('selected');
+        currentSelection.push(targetCell);
+    }
+}
+
+function handleTouchMove(e) {
+    if (!isMouseDown) return;
+    e.preventDefault(); // Bloquea el scroll del móvil
+
+    const touch = e.touches[0];
+    const targetCell = getCellFromCoordinates(touch.clientX, touch.clientY);
+    
+    if (targetCell) {
+        highlightSelection(targetCell);
+    }
+}
+
+
+// ----------------------------------------------------------------------
+// ## 5. Verificación y Marcado Automático
+// ----------------------------------------------------------------------
+
+function checkWord(word) {
+    if (selectedWords.includes(word) && !foundWords.has(word)) {
+        
+        // Marcado permanente en la cuadrícula (Color B: Verde)
+        currentSelection.forEach(cell => {
+            cell.classList.remove('selected'); 
+            cell.classList.add('found'); 
+        });
+
+        // Marcado automático en la lista (Checkbox con ✓)
+        const listItem = wordListElement.querySelector(`li[data-word="${word}"]`);
+        if (listItem) {
+            listItem.classList.add('found-word');
+            const checkbox = listItem.querySelector('.checkbox');
+            checkbox.classList.add('checked');
+            checkbox.innerHTML = '&#10003;';
+        }
+        foundWords.add(word); 
+    }
+}
+
+// ----------------------------------------------------------------------
+// ## 6. Inicio del Programa (Listeners Globales)
+// ----------------------------------------------------------------------
+
+newGameButton.addEventListener('click', initializeGame);
+
+// * FIX FINAL: Atachamos los eventos de movimiento y fin a nivel del DOCUMENTO
+document.addEventListener('mousemove', handleGlobalMouseMove); 
+document.addEventListener('mouseup', handleMouseUp); 
+document.addEventListener('touchend', handleMouseUp); // touchend usa la misma lógica que mouseup
+
+// Inicializar el juego al cargar la página
+initializeGame();
