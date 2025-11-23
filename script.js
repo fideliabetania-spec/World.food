@@ -87,15 +87,9 @@ function fillEmptyCells(grid) {
 }
 
 function renderGrid(grid) {
-    wordSearchGrid.innerHTML = '';
-    wordSearchGrid.style.setProperty('--grid-cols', GRID_SIZE); // Establecer variable CSS
-    grid.forEach((row, rowIndex) => {
-        row.forEach((cell, colIndex) => {
-            const div = document.createElement('div');
-            div.classList.add('grid-cell');
-            div.dataset.row = rowIndex;
-            div.dataset.col = colIndex;
-            div.textContent = cell;
+  div.addEventListener('touchstart', handleTouchStart, { passive: true });
+        div.addEventListener('touchmove', handleTouchMove, { passive: false });
+        div.addEventListener('touchend', handleMouseUp); // Reutilizamos handleMouseUp
             wordSearchGrid.appendChild(div);
 
             div.addEventListener('mousedown', handleMouseDown);
@@ -141,13 +135,15 @@ function handleMouseUp() {
 }
 
 function handleMouseEnter(e) {
-    if (!isMouseDown || !startCell) return;
-
-    const targetCell = e.target;
-    const startRow = parseInt(startCell.dataset.row);
-    const startCol = parseInt(startCell.dataset.col);
-    const targetRow = parseInt(targetCell.dataset.row);
-    const targetCol = parseInt(targetCell.dataset.col);
+  e.preventDefault();
+const touch = e.touches[0];
+    const targetCell = document.elementFromPoint(touch.clientX, touch.clientY);
+   if (targetCell && targetCell.classList.contains('grid-cell')) {
+        isMouseDown = true; // Usamos la misma bandera lógica
+        startCell = targetCell;
+        clearSelection();
+        targetCell.classList.add('selected');
+        currentSelection.push(targetCell);
 
     // Solo permitir selección horizontal de izquierda a derecha
     if (startRow === targetRow && targetCol >= startCol) {
@@ -197,4 +193,5 @@ function checkWord(word) {
 newGameButton.addEventListener('click', initializeGame);
 
 // Iniciar el juego la primera vez
+
 initializeGame();
