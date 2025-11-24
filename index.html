@@ -1,66 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>World🍕Food - Sopa de Letras</title>
-<link rel="stylesheet" href="styles.css">
-
-<!-- Bloquear selección y copiado -->
-<style>
-* {
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sopa de Letras de Comida</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <h1>¡Encuentra la Comida! 🍽️</h1>
+        <p>Busca las palabras de comida ocultas en la cuadrícula.</p>
+        
+        <div class="grid-container" id="wordSearchGrid"></div>
 
-<!-- =========================== -->
-<!--   PANTALLA DE INICIO        -->
-<!-- =========================== -->
-
-<div id="inicio" class="pantalla-inicio">
-
-    <p class="firma">Hecho por Fidelia Betania</p>
-
-    <div class="contenedor-inicio">
-
-        <!-- Imagen generada – incluida en Base64 -->
-        <img class="img-inicio" 
-        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAABPYUeVAAAABmJLR0QA/wD/AP+gvaeTAAAgAElEQVR4nOzde5Ac5X0/8OfMzuzszMxmZs40My8yy8xmMy6zWZnmXh0B1oCXgoHAYiFERViC0LTWnr1urqruu99p1W9ru6urq6q7q7W1pWTRRaYFYEQAAACAgNiBAABgIiIAAIBiIgAAAGIiIAAAYCIiAACAYiIAAAAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAA..." />
-
-        <h1 class="titulo">
-            Bienvenidos a W<span class="pizza">🍕</span>rld.food
-        </h1>
-
-        <button id="btnInicio" class="btn-jugar">Comienza</button>
-
+        <div class="separator"></div>
+        
+        <h2>Palabras a Encontrar:</h2>
+        <ul id="wordList"></ul>
+        
+        <button id="newGameButton">Nuevo Juego</button>
     </div>
-</div>
-
-<!-- =========================== -->
-<!--   JUEGO REAL                -->
-<!-- =========================== -->
-
-<div id="juego" class="pantalla-juego oculto">
-
-    <h2 class="titulo-juego">SOPA DE LETRAS DE COMIDA</h2>
-
-    <div class="grid-container" id="grid"></div>
-
-    <div class="lista-palabras">
-        <h3>Palabras a Encontrar:</h3>
-        <ul id="lista"></ul>
-    </div>
-
-    <button class="btn-jugar" id="btnNueva">Nueva partida</button>
-
-</div>
-
-<script src="script.js"></script>
-
+    
+    <script src="script.js"></script>
 </body>
 </html>
