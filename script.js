@@ -1,121 +1,237 @@
-const palabras = ["PIZZA", "PASTA", "TACO", "SOPA", "ARROZ"];
+const allFoodWords = [
+    'PIZZA', 'PAELLA', 'SUSHI', 'TACOS', 'ENSALADA', 'SOPA', 'ARROZ', 'PASTA', 'POLLO', 'CARNE',
+    'PESCADO', 'QUESO', 'LECHE', 'JUGO', 'VINO', 'CEBOLLA', 'AJO', 'VAINILLA', 'AZUCAR', 'HARINA',
+    'HUEVOS', 'MANZANA', 'NARANJA', 'FRESAS', 'CHOCOLATE', 'GALLETAS', 'PANQUEQUE', 'TARTA', 'MANTECA', 'SALSA'
+];
 
-let canvas = document.getElementById("sopa");
-let ctx = canvas.getContext("2d");
-let gridSize = 10;
-let cellSize = 35;
+const GRID_SIZE = 16;
+const NUM_WORDS = 15;
 
-canvas.width = gridSize * cellSize;
-canvas.height = gridSize * cellSize;
+const wordSearchGrid = document.getElementById('wordSearchGrid');
+const wordListElement = document.getElementById('wordList');
+const newGameButton = document.getElementById('newGameButton');
 
-let sopa = [];
-let seleccion = [];
-let juegoIniciado = false;
+let selectedWords = [];
+let grid = [];
+let isMouseDown = false;
+let startCell = null;
+let currentSelection = [];
+let foundWords = new Set();
 
-function generarSopa() {
-    sopa = Array.from({ length: gridSize }, () => Array(gridSize).fill(""));
 
-    palabras.forEach(p => {
+// =======================================================================
+// ✔ 1. Inicializar Juego
+// =======================================================================
+
+function initializeGame() {
+    selectedWords = getRandomWords(allFoodWords, NUM_WORDS);
+    grid = createEmptyGrid(GRID_SIZE);
+    placeWordsInGrid(selectedWords, grid);
+    fillEmptyCells(grid);
+    renderGrid(grid);
+    renderWordList(selectedWords);
+
+    isMouseDown = false;
+    startCell = null;
+    currentSelection = [];
+    foundWords = new Set();
+}
+
+function getRandomWords(pool, count) {
+    return [...pool].sort(() => Math.random() - 0.5).slice(0, count).sort();
+}
+
+function createEmptyGrid(size) {
+    return Array(size).fill(0).map(() => Array(size).fill(''));
+}
+
+function placeWordsInGrid(words, grid) {
+    words.forEach(word => {
         let placed = false;
-        while (!placed) {
-            let x = Math.floor(Math.random() * gridSize);
-            let y = Math.floor(Math.random() * gridSize);
-            let horizontal = Math.random() > 0.5;
+        let tries = 0;
 
-            if (horizontal) {
-                if (x + p.length <= gridSize) {
-                    for (let i = 0; i < p.length; i++) sopa[y][x + i] = p[i];
-                    placed = true;
-                }
-            } else {
-                if (y + p.length <= gridSize) {
-                    for (let i = 0; i < p.length; i++) sopa[y + i][x] = p[i];
-                    placed = true;
+        while (!placed && tries < 100) {
+            const row = Math.floor(Math.random() * GRID_SIZE);
+            const col = Math.floor(Math.random() * (GRID_SIZE - word.length));
+
+            let ok = true;
+            for (let i = 0; i < word.length; i++) {
+                if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) {
+                    ok = false;
+                    break;
                 }
             }
+
+            if (ok) {
+                for (let i = 0; i < word.length; i++) {
+                    grid[row][col + i] = word[i];
+                }
+                placed = true;
+            }
+
+            tries++;
         }
     });
+}
 
-    // letras aleatorias
-    for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-            if (sopa[y][x] === "") {
-                sopa[y][x] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+function fillEmptyCells(grid) {
+    const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (grid[r][c] === '') {
+                grid[r][c] = alpha[Math.floor(Math.random() * alpha.length)];
             }
         }
     }
-
-    dibujar();
 }
 
-function dibujar() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-            ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            ctx.font = "26px Arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(sopa[y][x], x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
-        }
-    }
-}
+// =======================================================================
+// ✔ 2. Renderizar Cuadrícula
+// =======================================================================
 
-function actualizarLista() {
-    const lista = document.getElementById("lista-palabras");
-    lista.innerHTML = "";
-    palabras.forEach(p => {
-        let li = document.createElement("li");
-        li.id = "w_" + p;
-        li.textContent = p;
-        lista.appendChild(li);
+function renderGrid(grid) {
+    wordSearchGrid.innerHTML = '';
+    wordSearchGrid.style.setProperty('--grid-cols', GRID_SIZE);
+
+    grid.forEach((row, r) => {
+        row.forEach((cell, c) => {
+            const div = document.createElement('div');
+            div.classList.add('grid-cell');
+            div.dataset.row = r;
+            div.dataset.col = c;
+            div.textContent = cell;
+            wordSearchGrid.appendChild(div);
+        });
     });
 }
 
-canvas.addEventListener("mousedown", iniciarSeleccion);
-canvas.addEventListener("touchstart", iniciarSeleccion);
+function renderWordList(words) {
+    wordListElement.innerHTML = '';
 
-function iniciarSeleccion(e) {
-    seleccion = [];
-}
+    words.forEach(word => {
+        const li = document.createElement('li');
+        li.dataset.word = word;
 
-canvas.addEventListener("mouseup", finalizar);
-canvas.addEventListener("touchend", finalizar);
+        const box = document.createElement('div');
+        box.classList.add('checkbox');
 
-function finalizar() {
-    let texto = seleccion.join("");
-    palabras.forEach(p => {
-        if (p === texto) {
-            document.getElementById("w_" + p).classList.add("encontrada");
-        }
+        const span = document.createElement('span');
+        span.textContent = word;
+
+        li.appendChild(box);
+        li.appendChild(span);
+        wordListElement.appendChild(li);
     });
 }
 
-canvas.addEventListener("mousemove", mover);
-canvas.addEventListener("touchmove", mover);
 
-function mover(e) {
-    if (!e.buttons && e.type === "mousemove") return;
+// =======================================================================
+// ✔ 3. Selección por arrastre
+// =======================================================================
 
-    let rect = canvas.getBoundingClientRect();
-    let x = Math.floor((e.clientX - rect.left) / cellSize);
-    let y = Math.floor((e.clientY - rect.top) / cellSize);
+function getCellFromCoordinates(x, y) {
+    const el = document.elementFromPoint(x, y);
+    return el && el.classList.contains('grid-cell') ? el : null;
+}
 
-    if (x >= 0 && y >= 0 && x < gridSize && y < gridSize) {
-        let letra = sopa[y][x];
-        if (!seleccion.includes(letra)) seleccion.push(letra);
+function clearSelection() {
+    currentSelection.forEach(c => c.classList.remove('selected'));
+    currentSelection = [];
+}
+
+function highlightSelection(cell) {
+    if (!startCell || !cell) return;
+
+    const r1 = +startCell.dataset.row;
+    const c1 = +startCell.dataset.col;
+    const r2 = +cell.dataset.row;
+    const c2 = +cell.dataset.col;
+
+    clearSelection();
+
+    if (r1 === r2 && c2 >= c1) {
+        for (let c = c1; c <= c2; c++) {
+            const el = wordSearchGrid.querySelector(`[data-row="${r1}"][data-col="${c}"]`);
+            if (el) {
+                el.classList.add('selected');
+                currentSelection.push(el);
+            }
+        }
+    } else {
+        startCell.classList.add('selected');
+        currentSelection.push(startCell);
     }
 }
 
-document.getElementById("btnStart").onclick = () => {
-    document.getElementById("pantalla-inicio").style.display = "none";
-    document.getElementById("juego").style.display = "block";
-    generarSopa();
-    actualizarLista();
-};
+function handlePointerDown(e) {
+    if (!e.target.classList.contains('grid-cell')) return;
 
-document.getElementById("btnNuevo").onclick = () => {
-    generarSopa();
-    actualizarLista();
-};
+    e.preventDefault();
+    isMouseDown = true;
+    startCell = e.target;
+
+    clearSelection();
+    startCell.classList.add('selected');
+    currentSelection.push(startCell);
+
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
+}
+
+function handlePointerMove(e) {
+    if (!isMouseDown) return;
+
+    const cell = getCellFromCoordinates(e.clientX, e.clientY);
+    if (cell) highlightSelection(cell);
+}
+
+function handlePointerUp() {
+    if (!isMouseDown) return;
+
+    isMouseDown = false;
+
+    document.removeEventListener('pointermove', handlePointerMove);
+    document.removeEventListener('pointerup', handlePointerUp);
+
+    if (currentSelection.length) {
+        const word = currentSelection.map(c => c.textContent).join('');
+        checkWord(word);
+    }
+
+    clearSelection();
+}
+
+
+// =======================================================================
+// ✔ 4. Validación
+// =======================================================================
+
+function checkWord(word) {
+    if (!selectedWords.includes(word) || foundWords.has(word)) return;
+
+    currentSelection.forEach(c => {
+        c.classList.remove('selected');
+        c.classList.add('found');
+    });
+
+    const li = wordListElement.querySelector(`li[data-word="${word}"]`);
+    if (li) {
+        li.classList.add('found-word');
+        const box = li.querySelector('.checkbox');
+        box.classList.add('checked');
+        box.innerHTML = '&#10003;';
+    }
+
+    foundWords.add(word);
+}
+
+
+// =======================================================================
+// ✔ 5. Iniciar Juego
+// =======================================================================
+
+newGameButton.addEventListener('click', initializeGame);
+wordSearchGrid.addEventListener('pointerdown', handlePointerDown);
+
+initializeGame();
