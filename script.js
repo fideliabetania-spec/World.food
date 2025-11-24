@@ -1,7 +1,7 @@
 const allFoodWords = [
     'PIZZA', 'PAELLA', 'SUSHI', 'TACOS', 'ENSALADA', 'SOPA', 'ARROZ', 'PASTA', 'POLLO', 'CARNE',
     'PESCADO', 'QUESO', 'LECHE', 'JUGO', 'VINO', 'CEBOLLA', 'AJO', 'VAINILLA', 'AZUCAR', 'HARINA',
-    'HUEVOS', 'MANZANA', 'NARANJA', 'FRESAS', 'CHOCOLATE', 'GALLETAS', 'PANQUEQUE', 'TARTA', 'MANTECA', 'SALSA'
+    'HUEVOS', 'MANZANA', 'NARANJA', 'FRESAS', 'CHOCOLATE', 'GALLETAS', 'PANQUEQUES', 'TARTA', 'MANTECA', 'SALSA'
 ];
 
 const GRID_SIZE = 16;
@@ -235,3 +235,4 @@ newGameButton.addEventListener('click', initializeGame);
 wordSearchGrid.addEventListener('pointerdown', handlePointerDown);
 
 initializeGame();
+
