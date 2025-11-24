@@ -1,17 +1,3 @@
-// ===============================================================
-// 🔥 AGREGADO: Evita zoom accidental con 2 dedos en móvil
-// ===============================================================
-document.addEventListener('touchstart', function(e) {
-    if (e.touches.length > 1) {
-        e.preventDefault();
-    }
-}, { passive: false });
-
-
-// ==========================
-// Tu código original empieza
-// ==========================
-
 const allFoodWords = [
     'PIZZA', 'PAELLA', 'SUSHI', 'TACOS', 'ENSALADA', 'SOPA', 'ARROZ', 'PASTA', 'POLLO', 'CARNE',
     'PESCADO', 'QUESO', 'LECHE', 'JUGO', 'VINO', 'CEBOLLA', 'AJO', 'VAINILLA', 'AZUCAR', 'HARINA',
@@ -27,18 +13,21 @@ const newGameButton = document.getElementById('newGameButton');
 
 let selectedWords = [];
 let grid = [];
+let wordLocations = new Map(); // Para almacenar la ubicación de las palabras en la cuadrícula
 let isMouseDown = false;
 let startCell = null;
 let currentSelection = [];
 let foundWords = new Set();
 
-// ===============================================================
-// Inicializar Juego
-// ===============================================================
+
+// =======================================================================
+// ✔ 1. Inicializar Juego
+// =======================================================================
 
 function initializeGame() {
     selectedWords = getRandomWords(allFoodWords, NUM_WORDS);
     grid = createEmptyGrid(GRID_SIZE);
+    wordLocations = new Map(); // Reiniciar mapa
     placeWordsInGrid(selectedWords, grid);
     fillEmptyCells(grid);
     renderGrid(grid);
@@ -59,32 +48,54 @@ function createEmptyGrid(size) {
 }
 
 function placeWordsInGrid(words, grid) {
+    const directions = [
+        [0, 1], [0, -1], // Horizontal (Derecha, Izquierda)
+        [1, 0], [-1, 0], // Vertical (Abajo, Arriba)
+        [1, 1], [1, -1], [-1, 1], [-1, -1] // Diagonal
+    ];
+
     words.forEach(word => {
         let placed = false;
         let tries = 0;
 
         while (!placed && tries < 100) {
-            const row = Math.floor(Math.random() * GRID_SIZE);
-            const col = Math.floor(Math.random() * (GRID_SIZE - word.length));
+            const r = Math.floor(Math.random() * GRID_SIZE);
+            const c = Math.floor(Math.random() * GRID_SIZE);
+            const [dr, dc] = directions[Math.floor(Math.random() * directions.length)];
 
-            let ok = true;
-            for (let i = 0; i < word.length; i++) {
-                if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) {
-                    ok = false;
-                    break;
-                }
-            }
-
-            if (ok) {
+            if (canPlaceWord(word, r, c, dr, dc, grid)) {
+                const location = [];
                 for (let i = 0; i < word.length; i++) {
-                    grid[row][col + i] = word[i];
+                    const newR = r + i * dr;
+                    const newC = c + i * dc;
+                    grid[newR][newC] = word[i];
+                    location.push({ r: newR, c: newC });
                 }
+                wordLocations.set(word, location);
                 placed = true;
             }
 
             tries++;
         }
     });
+}
+
+function canPlaceWord(word, r, c, dr, dc, grid) {
+    for (let i = 0; i < word.length; i++) {
+        const newR = r + i * dr;
+        const newC = c + i * dc;
+
+        // Comprobar límites de la cuadrícula
+        if (newR < 0 || newR >= GRID_SIZE || newC < 0 || newC >= GRID_SIZE) {
+            return false;
+        }
+
+        // Comprobar colisión
+        if (grid[newR][newC] !== '' && grid[newR][newC] !== word[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 function fillEmptyCells(grid) {
@@ -97,6 +108,12 @@ function fillEmptyCells(grid) {
         }
     }
 }
+
+
+// =======================================================================
+// ✔ 2. Renderizar Cuadrícula
+// =======================================================================
+// (Sin cambios, ya que maneja bien el rendering)
 
 function renderGrid(grid) {
     wordSearchGrid.innerHTML = '';
@@ -133,6 +150,11 @@ function renderWordList(words) {
     });
 }
 
+
+// =======================================================================
+// ⚡ 3. Selección por arrastre (Modificado para 8 direcciones)
+// =======================================================================
+
 function getCellFromCoordinates(x, y) {
     const el = document.elementFromPoint(x, y);
     return el && el.classList.contains('grid-cell') ? el : null;
@@ -143,31 +165,74 @@ function clearSelection() {
     currentSelection = [];
 }
 
-function highlightSelection(cell) {
-    if (!startCell || !cell) return;
+/**
+ * Resalta la selección de celdas en línea recta desde startCell hasta endCell.
+ * @param {HTMLElement} endCell - La celda actual del puntero.
+ */
+function highlightSelection(endCell) {
+    if (!startCell || !endCell) return;
 
     const r1 = +startCell.dataset.row;
     const c1 = +startCell.dataset.col;
-    const r2 = +cell.dataset.row;
-    const c2 = +cell.dataset.col;
+    const r2 = +endCell.dataset.row;
+    const c2 = +endCell.dataset.col;
 
-    clearSelection();
+    const dr = r2 - r1;
+    const dc = c2 - c1;
 
-    if (r1 === r2 && c2 >= c1) {
-        for (let c = c1; c <= c2; c++) {
-            const el = wordSearchGrid.querySelector(`[data-row="${r1}"][data-col="${c}"]`);
-            if (el) {
-                el.classList.add('selected');
-                currentSelection.push(el);
-            }
-        }
-    } else {
+    // Calcular la dirección. Solo permitimos 8 direcciones (horizontal, vertical, diagonal).
+    // Si la selección no es en línea recta, solo se resalta la celda inicial.
+
+    const length = Math.max(Math.abs(dr), Math.abs(dc));
+    if (length === 0) {
+        clearSelection();
         startCell.classList.add('selected');
         currentSelection.push(startCell);
+        return;
+    }
+
+    const abs_dr = Math.abs(dr);
+    const abs_dc = Math.abs(dc);
+
+    // Comprobar si es una dirección válida (horizontal, vertical o diagonal a 45 grados)
+    if (abs_dr !== 0 && abs_dc !== 0 && abs_dr !== abs_dc) {
+        // No es una línea recta válida
+        clearSelection();
+        startCell.classList.add('selected');
+        currentSelection.push(startCell);
+        return;
+    }
+
+    // Calcular el paso (dr_step y dc_step)
+    const r_step = dr / length;
+    const c_step = dc / length;
+    
+    if (r_step !== Math.round(r_step) || c_step !== Math.round(c_step)) {
+         // Asegura que el paso es un número entero (necesario para la dirección)
+         clearSelection();
+         startCell.classList.add('selected');
+         currentSelection.push(startCell);
+         return;
+    }
+
+
+    clearSelection();
+    
+    // Recorrer las celdas en la dirección del arrastre
+    for (let i = 0; i <= length; i++) {
+        const r = r1 + i * r_step;
+        const c = c1 + i * c_step;
+
+        const el = wordSearchGrid.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+        if (el) {
+            el.classList.add('selected');
+            currentSelection.push(el);
+        }
     }
 }
 
 function handlePointerDown(e) {
+    // La comprobación de clase 'grid-cell' en e.target sigue siendo importante
     if (!e.target.classList.contains('grid-cell')) return;
 
     e.preventDefault();
@@ -178,6 +243,7 @@ function handlePointerDown(e) {
     startCell.classList.add('selected');
     currentSelection.push(startCell);
 
+    // Eventos 'pointer' funcionan para mouse y táctil
     document.addEventListener('pointermove', handlePointerMove);
     document.addEventListener('pointerup', handlePointerUp);
 }
@@ -185,6 +251,7 @@ function handlePointerDown(e) {
 function handlePointerMove(e) {
     if (!isMouseDown) return;
 
+    // Obtiene coordenadas para mouse (clientX/Y) o táctil.
     const cell = getCellFromCoordinates(e.clientX, e.clientY);
     if (cell) highlightSelection(cell);
 }
@@ -197,42 +264,71 @@ function handlePointerUp() {
     document.removeEventListener('pointermove', handlePointerMove);
     document.removeEventListener('pointerup', handlePointerUp);
 
-    if (currentSelection.length) {
+    if (currentSelection.length > 1) { // Solo si se ha seleccionado más de una celda
         const word = currentSelection.map(c => c.textContent).join('');
+        const reversedWord = currentSelection.slice().reverse().map(c => c.textContent).join('');
+        
+        // Se comprueba la palabra en la dirección de la selección (word)
+        // Y la palabra al revés (reversedWord)
         checkWord(word);
+        checkWord(reversedWord);
     }
 
     clearSelection();
 }
 
+
+// =======================================================================
+// ✔ 4. Validación (Ligeros ajustes)
+// =======================================================================
+
 function checkWord(word) {
     if (!selectedWords.includes(word) || foundWords.has(word)) return;
 
-    currentSelection.forEach(c => {
-        c.classList.remove('selected');
-        c.classList.add('found');
+    // Obtener la ubicación de la palabra para mantenerla resaltada si se encuentra
+    let wordFoundLocation = [];
+    if (wordLocations.has(word)) {
+        wordFoundLocation = wordLocations.get(word);
+    } else {
+        // Si la palabra está en la lista de seleccionadas, pero no en el mapa, 
+        // significa que es la palabra al revés. Buscamos la ubicación de la palabra original
+        // y la invertimos. Esto es solo una comprobación de seguridad.
+        const reversed = word.split('').reverse().join('');
+        if (wordLocations.has(reversed)) {
+             wordFoundLocation = wordLocations.get(reversed).slice().reverse();
+        }
+    }
+
+    // Resaltar las celdas encontradas (usando la ubicación almacenada)
+    wordFoundLocation.forEach(({r, c}) => {
+        const el = wordSearchGrid.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+        if (el) {
+            el.classList.remove('selected');
+            el.classList.add('found');
+        }
     });
 
     const li = wordListElement.querySelector(`li[data-word="${word}"]`);
-    if (li) {
-        li.classList.add('found-word');
-        const box = li.querySelector('.checkbox');
+    // Si la palabra encontrada es la palabra al revés, marcamos la palabra original en la lista
+    const targetWord = selectedWords.find(w => w === word || w === word.split('').reverse().join(''));
+    const liTarget = wordListElement.querySelector(`li[data-word="${targetWord}"]`);
+
+    if (liTarget) {
+        liTarget.classList.add('found-word');
+        const box = liTarget.querySelector('.checkbox');
         box.classList.add('checked');
         box.innerHTML = '&#10003;';
+        foundWords.add(targetWord);
     }
-
-    foundWords.add(word);
 }
 
+
+// =======================================================================
+// ✔ 5. Iniciar Juego
+// =======================================================================
+
 newGameButton.addEventListener('click', initializeGame);
+// 'pointerdown' maneja tanto el clic del ratón como el toque táctil.
 wordSearchGrid.addEventListener('pointerdown', handlePointerDown);
 
 initializeGame();
-
-
-// ===============================================================
-// 🔥 AGREGADO: evita scroll mientras arrastras la selección
-// ===============================================================
-wordSearchGrid.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-}, { passive: false });
