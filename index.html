@@ -1,39 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>World Food</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sopa de Letras de Comida</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <h1>¡Encuentra la Comida! 🍽️</h1>
+        <p>Busca las palabras de comida ocultas en la cuadrícula.</p>
+        
+        <div class="grid-container" id="wordSearchGrid"></div>
 
-    <!-- Marca personal -->
-    <div id="firma">by Fidelia Betania</div>
-
-    <!-- PANTALLA DE INICIO -->
-    <div id="pantalla-inicio">
-        <div class="titulo">
-            W<span class="pizza">🍕</span>rld Food
-        </div>
-
-        <button id="btnStart">Comenzar</button>
+        <div class="separator"></div>
+        
+        <h2>Palabras a Encontrar:</h2>
+        <ul id="wordList"></ul>
+        
+        <button id="newGameButton">Nuevo Juego</button>
     </div>
-
-    <!-- PANTALLA DEL JUEGO -->
-    <div id="juego" style="display:none;">
-        <h2 class="titulo-juego">World Food</h2>
-
-        <div id="sopa-container">
-            <canvas id="sopa"></canvas>
-        </div>
-
-        <h3>Palabras a encontrar:</h3>
-        <ul id="lista-palabras"></ul>
-
-        <button id="btnNuevo">Nueva partida</button>
-    </div>
-
+    
     <script src="script.js"></script>
 </body>
 </html>
