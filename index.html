@@ -1,27 +1,66 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sopa de Letras</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>World🍕Food - Sopa de Letras</title>
+<link rel="stylesheet" href="styles.css">
+
+<!-- Bloquear selección y copiado -->
+<style>
+* {
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+</style>
+
 </head>
 <body>
 
-    <!-- PANTALLA DE INICIO -->
-    <div id="inicio" class="pantalla-inicio">
-        <img src="welcome.png" alt="Inicio" class="imagen-inicio">
+<!-- =========================== -->
+<!--   PANTALLA DE INICIO        -->
+<!-- =========================== -->
 
-        <p class="creditos">Hecho por Fidelia Betania</p>
+<div id="inicio" class="pantalla-inicio">
 
-        <button id="btnStart" class="btn-start">Comenzar</button>
+    <p class="firma">Hecho por Fidelia Betania</p>
+
+    <div class="contenedor-inicio">
+
+        <!-- Imagen generada – incluida en Base64 -->
+        <img class="img-inicio" 
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAABPYUeVAAAABmJLR0QA/wD/AP+gvaeTAAAgAElEQVR4nOzde5Ac5X0/8OfMzuzszMxmZs40My8yy8xmMy6zWZnmXh0B1oCXgoHAYiFERViC0LTWnr1urqruu99p1W9ru6urq6q7q7W1pWTRRaYFYEQAAACAgNiBAABgIiIAAIBiIgAAAGIiIAAAYCIiAACAYiIAAAAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAAAAYiIAAGAiIgAAgGIiAA..." />
+
+        <h1 class="titulo">
+            Bienvenidos a W<span class="pizza">🍕</span>rld.food
+        </h1>
+
+        <button id="btnInicio" class="btn-jugar">Comienza</button>
+
+    </div>
+</div>
+
+<!-- =========================== -->
+<!--   JUEGO REAL                -->
+<!-- =========================== -->
+
+<div id="juego" class="pantalla-juego oculto">
+
+    <h2 class="titulo-juego">SOPA DE LETRAS DE COMIDA</h2>
+
+    <div class="grid-container" id="grid"></div>
+
+    <div class="lista-palabras">
+        <h3>Palabras a Encontrar:</h3>
+        <ul id="lista"></ul>
     </div>
 
-    <!-- PANTALLA DEL JUEGO REAL -->
-    <div id="juego" class="pantalla-juego oculto">
-        <img src="juego-referencia.jpg" class="juego-img">
-    </div>
+    <button class="btn-jugar" id="btnNueva">Nueva partida</button>
 
-    <script src="script.js"></script>
+</div>
+
+<script src="script.js"></script>
+
 </body>
 </html>
