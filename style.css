@@ -28,6 +28,7 @@ body {
   grid-template-columns: repeat(10, 30px);
   gap: 5px;
   justify-content: center;
+  user-select: none;
 }
 
 .cell {
@@ -40,5 +41,8 @@ body {
   align-items: center;
   font-weight: bold;
   font-size: 16px;
-  user-select: none;
+}
+
+.selected {
+  background: yellow;
 }
