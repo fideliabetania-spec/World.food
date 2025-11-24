@@ -3,29 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pantalla de Inicio</title>
-    <link rel="stylesheet" href="inicio.css">
+    <title>Sopa de Letras</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="credit">Ella por Fidelia Betania</header>
+    <!-- PANTALLA DE INICIO -->
+    <div id="inicio" class="pantalla-inicio">
+        <img src="welcome.png" alt="Inicio" class="imagen-inicio">
 
-<div class="sky">
-    <div class="cloud cloud1"></div>
-    <div class="cloud cloud2"></div>
-    <div class="cloud cloud3"></div>
+        <p class="creditos">Hecho por Fidelia Betania</p>
 
-    <h1 class="title">
-        Bienvenidos al <span class="word">
-            W<span class="pizza">🍕</span>rld.food
-        </span>
-    </h1>
+        <button id="btnStart" class="btn-start">Comenzar</button>
+    </div>
 
-    <button id="startGame" class="start-btn">Comienza</button>
-</div>
+    <!-- PANTALLA DEL JUEGO REAL -->
+    <div id="juego" class="pantalla-juego oculto">
+        <img src="juego-referencia.jpg" class="juego-img">
+    </div>
 
-<div class="grass"></div>
-
-<script src="inicio.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
