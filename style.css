@@ -1,148 +1,133 @@
 body {
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
     margin: 0;
-    background-color: #f0f0f0; 
-    color: #333;
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+}
 
-    /* 🔒 IMPIDE LA SELECCIÓN Y COPIA DE TEXTO */
+/* Bloquear selección */
+img, h1, p, button {
     user-select: none;
-    -webkit-user-select: none; 
-    -moz-user-select: none;
 }
 
-.container {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+.firma {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 14px;
+    color: black;
+}
+
+.pantalla-inicio {
     text-align: center;
-    max-width: 90%;
-    margin: 20px;
+    padding-top: 50px;
 }
 
-h1 {
-    color: #4CAF50; 
-    margin-bottom: 20px;
+.img-inicio {
+    width: 90%;
+    max-width: 450px;
 }
 
-h2 {
-    color: #555;
-    margin-top: 30px;
-    margin-bottom: 15px;
+.titulo {
+    font-size: 40px;
+    margin-top: 20px;
+    font-weight: bold;
 }
 
-/* ---------------------------------------------------------------------- */
-/* ## Estilo de la Cuadrícula */
-/* ---------------------------------------------------------------------- */
+.pizza {
+    font-size: 45px;
+    display: inline-block;
+    animation: giro 3s infinite linear;
+}
+
+@keyframes giro {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.btn-jugar {
+    margin-top: 25px;
+    padding: 14px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 12px;
+    background: #00aaff;
+    color: white;
+    cursor: pointer;
+}
+
+.oculto { display: none; }
+
+/* ============================ */
+/*      PANTALLA DEL JUEGO      */
+/* ============================ */
+
+.pantalla-juego {
+    padding: 20px;
+}
+
+.titulo-juego {
+    text-align: center;
+    font-size: 30px;
+    color: #00aa00;
+}
 
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(var(--grid-cols), 1fr); 
-    gap: 0; 
-    border: 2px solid #ccc;
-    background-color: #eee;
-    margin: 0 auto;
-    max-width: fit-content;
-    touch-action: pan-x pan-y; 
-}
-
-.grid-cell {
-    width: 30px; 
-    height: 30px; 
-    display: flex;
+    grid-template-columns: repeat(12, min(35px, 8vw));
+    grid-gap: 4px;
     justify-content: center;
-    align-items: center;
-    font-size: 1.1em;
+    margin-bottom: 25px;
+}
+
+.celda {
+    width: min(35px, 8vw);
+    height: min(35px, 8vw);
+    background: white;
+    border: 1px solid #ccc;
+    text-align: center;
     font-weight: bold;
-    color: #333;
-    background-color: #fdfdfd;
-    cursor: pointer;
-    transition: background-color 0.1s ease, color 0.1s ease;
-    border: 1px solid #e0e0e0; 
+    line-height: min(35px, 8vw);
+    font-size: 18px;
+    touch-action: none; /* NECESARIO PARA TABLETS */
 }
 
-.grid-cell.selected {
-    background-color: #ffe082; 
-    color: #444;
+.celda.seleccionada {
+    background: yellow;
 }
 
-.grid-cell.found {
-    background-color: #81c784; 
-    color: #fff;
-    font-weight: 900;
+.lista-palabras {
+    text-align: center;
 }
 
-/* ---------------------------------------------------------------------- */
-/* ## Lista y Botón */
-/* ---------------------------------------------------------------------- */
-
-#wordList {
+.lista-palabras ul {
     list-style: none;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
-    gap: 10px;
-    margin-top: 20px;
 }
 
-#wordList li {
-    display: flex;
-    align-items: center;
-    background-color: #e8f5e9; 
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-size: 1.1em;
-    color: #388e3c; 
+.lista-palabras li {
+    font-size: 20px;
+    margin: 5px 0;
+}
+
+.completa::before {
+    content: "✓ ";
+    color: green;
     font-weight: bold;
 }
 
-#wordList li.found-word {
-    text-decoration: line-through; 
-    color: #a5d6a7; 
-    background-color: #f1f8e9;
-}
+/* ==================== */
+/*   RESPONSIVE         */
+/* ==================== */
 
-.checkbox {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #4CAF50;
-    border-radius: 4px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
+@media (max-width: 768px) { 
+    /* Teléfonos */
+    .grid-container {
+        grid-template-columns: repeat(10, min(32px, 9vw));
+    }
 
-.checkbox.checked {
-    background-color: #4CAF50;
-    color: #fff;
-    font-size: 1.2em;
-}
-
-#newGameButton {
-    background-color: #2196F3;
-    color: white;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.1em;
-    margin-top: 30px;
-    transition: background-color 0.3s ease;
-}
-
-#newGameButton:hover {
-    background-color: #1976D2;
-}
-
-.separator {
-    width: 100%;
-    height: 1px;
-    background-color: #eee;
-    margin: 30px 0;
+    .celda {
+        width: min(32px, 9vw);
+        height: min(32px, 9vw);
+        line-height: min(32px, 9vw);
+    }
 }
