@@ -19,38 +19,38 @@ let startCell = null;
 let currentSelection = [];
 let foundWords = new Set();
 
-// Colores por palabra
+// Colores por palabra (coinciden con la comida)
 const wordColors = {
-    'PIZZA': 'red',
-    'PAELLA': 'orange',
-    'SUSHI': 'green',
-    'TACOS': 'yellow',
-    'ENSALADA': 'lime',
-    'SOPA': 'teal',
-    'ARROZ': 'blue',
-    'PASTA': 'purple',
-    'POLLO': 'pink',
-    'CARNE': 'brown',
-    'PESCADO': 'aqua',
-    'QUESO': 'gold',
-    'LECHE': 'lightblue',
-    'JUGO': 'darkorange',
-    'VINO': 'maroon',
-    'CEBOLLA': 'violet',
-    'AJO': 'silver',
-    'VAINILLA': 'beige',
-    'AZUCAR': 'plum',
-    'HARINA': 'tan',
-    'HUEVOS': 'khaki',
-    'MANZANA': 'crimson',
-    'NARANJA': 'darkorange',
-    'FRESAS': 'deeppink',
-    'CHOCOLATE': 'chocolate',
-    'GALLETAS': 'saddlebrown',
-    'PANQUEQUE': 'peru',
-    'TARTA': 'coral',
-    'MANTECA': 'lightyellow',
-    'SALSA': 'firebrick'
+    'PIZZA': '#FF6347',
+    'PAELLA': '#FFD700',
+    'SUSHI': '#228B22',
+    'TACOS': '#FFA500',
+    'ENSALADA': '#32CD32',
+    'SOPA': '#F4A460',
+    'ARROZ': '#FFFACD',
+    'PASTA': '#F5DEB3',
+    'POLLO': '#FFE4C4',
+    'CARNE': '#A52A2A',
+    'PESCADO': '#1E90FF',
+    'QUESO': '#FFD700',
+    'LECHE': '#FFF8DC',
+    'JUGO': '#FF8C00',
+    'VINO': '#8B0000',
+    'CEBOLLA': '#E6E6FA',
+    'AJO': '#F5F5DC',
+    'VAINILLA': '#F3E5AB',
+    'AZUCAR': '#FFFFFF',
+    'HARINA': '#FAF0E6',
+    'HUEVOS': '#FFFACD',
+    'MANZANA': '#FF0000',
+    'NARANJA': '#FFA500',
+    'FRESAS': '#FF1493',
+    'CHOCOLATE': '#D2691E',
+    'GALLETAS': '#DEB887',
+    'PANQUEQUE': '#F5DEB3',
+    'TARTA': '#FF69B4',
+    'MANTECA': '#FFFFE0',
+    'SALSA': '#FF4500'
 };
 
 // =======================================================================
@@ -286,7 +286,7 @@ function handlePointerUp() {
 }
 
 // =======================================================================
-// ✔ 4. Validación con color por palabra
+// ✔ 4. Validación con color por comida
 // =======================================================================
 
 function checkWord(word) {
